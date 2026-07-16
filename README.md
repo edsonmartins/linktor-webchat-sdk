@@ -25,8 +25,11 @@ packages/
   vue/      @linktor/vue-webchat      — componente Vue 3
   angular/  @linktor/angular-webchat  — componente + módulo Angular
 examples/
-  html/     página de exemplo (HTML puro)
+  html/        página de exemplo (HTML puro, via loader)
+  react-demo/  app Vite que consome o @linktor/react-webchat publicado (testa canal ao vivo)
 ```
+
+> Para testar um canal WebChat rapidamente: `cd examples/react-demo && npm install && npm run dev`.
 
 ## Build
 
