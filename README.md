@@ -54,6 +54,86 @@ serve em `/widget/v1/linktor.js`.
 
 Eventos: `onReady`, `onOpen`, `onClose`, `onMessage(msg)`.
 
+## Customização / extensibilidade
+
+O widget é extensível em quatro níveis, do mais simples ao mais completo. Todas
+as opções valem para qualquer alvo (HTML, React, Vue, Angular) — são apenas
+campos do `LinktorConfig` / props do componente.
+
+### 1. `theme` — tokens visuais
+
+Cada token vira uma CSS custom property escopada na raiz do widget (não vaza
+para a página). Tudo é opcional; o não informado usa o padrão.
+
+```ts
+theme: {
+  primaryColor: '#4f46e5',
+  fontFamily: '"Inter", sans-serif',
+  fontSize: '15px',
+  width: '400px',
+  height: '600px',
+  borderRadius: '16px',
+  background: '#ffffff',
+  launcherSize: '64px',
+  launcherIconColor: '#ffffff',
+  headerBg: '#111827',        // padrão: primaryColor
+  headerColor: '#ffffff',
+  agentBubbleBg: '#f3f4f6',
+  agentBubbleColor: '#111827',
+  userBubbleBg: '#4f46e5',    // padrão: primaryColor
+  userBubbleColor: '#ffffff',
+}
+```
+
+### 2. `labels` — textos / i18n / white-label
+
+```ts
+labels: {
+  title: 'Fale com a gente',
+  online: 'Disponível',
+  offline: 'Ausente',
+  connecting: 'Conectando…',
+  inputPlaceholder: 'Escreva sua mensagem…',
+  sendAriaLabel: 'Enviar',
+  poweredBy: false,           // remove o rodapé "Powered by Linktor"
+}
+```
+
+`hidePoweredBy: true` é um atalho para `labels.poweredBy = false`.
+
+### 3. `launcherIcon` + `renderMessage` — override de render
+
+```ts
+launcherIcon: '<svg viewBox="0 0 24 24">…</svg>', // ou emoji, ou <img>
+
+// Substitui a bolha de mensagem. Retorne HTMLElement, string HTML,
+// ou nada para manter o padrão (ctx.defaultElement é a bolha original).
+renderMessage: (msg, ctx) => {
+  if (msg.sender_type === 'system') {
+    return `<div class="my-system">${msg.content}</div>`
+  }
+  return ctx.defaultElement // mantém o padrão
+}
+```
+
+### 4. `customCss` — escape hatch total
+
+CSS bruto injetado após a folha base (ganha por ordem de carga). Estilize
+qualquer `.linktor-*`:
+
+```ts
+customCss: `
+  .linktor-launcher { box-shadow: 0 0 0 4px rgba(79,70,229,.25); }
+  .linktor-header { text-transform: uppercase; letter-spacing: .5px; }
+`
+```
+
+Classes estáveis para estilizar: `.linktor-widget`, `.linktor-launcher`,
+`.linktor-chat`, `.linktor-header`, `.linktor-header-title`,
+`.linktor-header-status`, `.linktor-messages`, `.linktor-message`
+(`.contact` / `.user` / `.system`), `.linktor-message-time`,
+`.linktor-input-area`, `.linktor-input`, `.linktor-send`, `.linktor-powered`.
+
 ## HTML puro
 
 ```html

@@ -71,10 +71,25 @@
       linktor('init', {
         channelId: 'YOUR_CHANNEL_ID',
         baseUrl: 'https://api.linktor.dev',
-        title: 'Fale conosco',
-        primaryColor: '#4f46e5',
         position: 'right',
         visitor: { name: 'Visitante Demo', email: 'demo@example.com' },
+
+        // --- customização ---
+        theme: {
+          primaryColor: '#4f46e5',
+          fontFamily: 'system-ui, sans-serif',
+          borderRadius: '16px',
+          launcherSize: '64px',
+          headerBg: '#111827',
+          agentBubbleBg: '#f3f4f6',
+        },
+        labels: {
+          title: 'Fale conosco',
+          online: 'Disponível',
+          inputPlaceholder: 'Escreva sua mensagem…',
+          poweredBy: false,
+        },
+        customCss: `.linktor-launcher { box-shadow: 0 0 0 4px rgba(79,70,229,.25); }`,
       })
 
       linktor('updateUser', { name: 'Edson' })

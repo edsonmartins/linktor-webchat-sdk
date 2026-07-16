@@ -1,6 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { LinktorWebChat } from '@linktor/webchat-core'
-import type { LinktorMessage, LinktorVisitor } from '@linktor/webchat-core'
+import type {
+  LinktorLabels,
+  LinktorMessage,
+  LinktorRenderContext,
+  LinktorTheme,
+  LinktorVisitor,
+} from '@linktor/webchat-core'
 
 /**
  * Angular wrapper around the Linktor WebChat core. Mounts in ngOnInit, tears
@@ -23,6 +29,12 @@ export class LinktorChatComponent implements OnInit, OnDestroy {
   @Input() autoOpen?: boolean
   @Input() showLauncher?: boolean
   @Input() token?: string
+  @Input() theme?: LinktorTheme
+  @Input() labels?: LinktorLabels
+  @Input() launcherIcon?: string
+  @Input() customCss?: string
+  @Input() hidePoweredBy?: boolean
+  @Input() renderMessage?: (m: LinktorMessage, ctx: LinktorRenderContext) => HTMLElement | string | void
 
   @Output() message = new EventEmitter<LinktorMessage>()
   @Output() ready = new EventEmitter<void>()
@@ -42,6 +54,12 @@ export class LinktorChatComponent implements OnInit, OnDestroy {
       autoOpen: this.autoOpen,
       showLauncher: this.showLauncher,
       token: this.token,
+      theme: this.theme,
+      labels: this.labels,
+      launcherIcon: this.launcherIcon,
+      customCss: this.customCss,
+      hidePoweredBy: this.hidePoweredBy,
+      renderMessage: this.renderMessage,
       onMessage: (m) => this.message.emit(m),
       onReady: () => this.ready.emit(),
       onOpen: () => this.opened.emit(),

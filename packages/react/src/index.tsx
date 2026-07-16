@@ -39,4 +39,11 @@ export function LinktorChat(props: LinktorChatProps): null {
 }
 
 export { LinktorWebChat } from '@linktor/webchat-core'
-export type { LinktorConfig, LinktorMessage, LinktorVisitor } from '@linktor/webchat-core'
+export type {
+  LinktorConfig,
+  LinktorMessage,
+  LinktorVisitor,
+  LinktorTheme,
+  LinktorLabels,
+  LinktorRenderContext,
+} from '@linktor/webchat-core'

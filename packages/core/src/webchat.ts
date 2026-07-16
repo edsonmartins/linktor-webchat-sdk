@@ -2,10 +2,43 @@ import { widgetStyles } from './styles'
 import type {
   LinktorConfig,
   LinktorEvent,
+  LinktorLabels,
   LinktorMessage,
+  LinktorTheme,
   LinktorVisitor,
   LinktorWidgetConfig,
 } from './types'
+
+const DEFAULT_LABELS: Required<Omit<LinktorLabels, 'poweredBy'>> & { poweredBy: string | false } = {
+  title: 'Chat',
+  online: 'Online',
+  offline: 'Offline',
+  connecting: 'Connecting…',
+  inputPlaceholder: 'Type a message…',
+  sendAriaLabel: 'Send',
+  launcherAriaLabel: 'Open chat',
+  closeAriaLabel: 'Close chat',
+  poweredBy: 'Powered by <a href="https://linktor.io" target="_blank" rel="noopener">Linktor</a>',
+}
+
+// Maps theme tokens to the CSS custom properties consumed by styles.ts.
+const THEME_VARS: Record<keyof LinktorTheme, string> = {
+  primaryColor: '--linktor-color',
+  fontFamily: '--linktor-font-family',
+  fontSize: '--linktor-font-size',
+  width: '--linktor-width',
+  height: '--linktor-height',
+  borderRadius: '--linktor-radius',
+  background: '--linktor-background',
+  launcherSize: '--linktor-launcher-size',
+  launcherIconColor: '--linktor-launcher-icon-color',
+  headerBg: '--linktor-header-bg',
+  headerColor: '--linktor-header-color',
+  agentBubbleBg: '--linktor-agent-bubble-bg',
+  agentBubbleColor: '--linktor-agent-bubble-color',
+  userBubbleBg: '--linktor-user-bubble-bg',
+  userBubbleColor: '--linktor-user-bubble-color',
+}
 
 const LAUNCHER_ICON =
   '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>'
@@ -24,6 +57,7 @@ const MAX_RECONNECT = 5
  */
 export class LinktorWebChat {
   private cfg: LinktorConfig
+  private labels: typeof DEFAULT_LABELS
   private sessionId: string
   private ws: WebSocket | null = null
   private isOpen = false
@@ -41,12 +75,23 @@ export class LinktorWebChat {
   private sendEl?: HTMLButtonElement
   private titleEl?: HTMLElement
   private statusEl?: HTMLElement
+  private customStyleEl?: HTMLElement
 
   constructor(config: LinktorConfig) {
     if (!config || !config.channelId) throw new Error('Linktor: channelId is required')
     if (!config.baseUrl) throw new Error('Linktor: baseUrl is required')
     this.cfg = { position: 'right', zIndex: 999999, showLauncher: true, ...config }
+    this.labels = this.resolveLabels(config)
     this.sessionId = this.getSessionId()
+  }
+
+  /** Merges default labels with `title` shorthand and explicit label overrides. */
+  private resolveLabels(config: LinktorConfig): typeof DEFAULT_LABELS {
+    const merged = { ...DEFAULT_LABELS, ...(config.labels || {}) }
+    if (config.title) merged.title = config.title
+    if (config.labels?.title) merged.title = config.labels.title
+    if (config.hidePoweredBy) merged.poweredBy = false
+    return merged
   }
 
   /** Injects styles + DOM and wires events. Idempotent. */
@@ -132,6 +177,7 @@ export class LinktorWebChat {
       this.ws = null
     }
     this.root?.remove()
+    this.customStyleEl?.remove()
     this.listeners = {}
   }
 
@@ -170,24 +216,39 @@ export class LinktorWebChat {
   }
 
   private injectStyles(): void {
-    if (document.getElementById('linktor-styles')) return
-    const style = document.createElement('style')
-    style.id = 'linktor-styles'
-    style.textContent = widgetStyles(this.cfg.position!, this.cfg.zIndex!)
-    document.head.appendChild(style)
+    if (!document.getElementById('linktor-styles')) {
+      const style = document.createElement('style')
+      style.id = 'linktor-styles'
+      style.textContent = widgetStyles(this.cfg.position!, this.cfg.zIndex!)
+      document.head.appendChild(style)
+    }
+    // Per-instance escape hatch: raw CSS wins over the base sheet by load order.
+    if (this.cfg.customCss) {
+      const custom = document.createElement('style')
+      custom.className = 'linktor-custom-css'
+      custom.textContent = this.cfg.customCss
+      document.head.appendChild(custom)
+      this.customStyleEl = custom
+    }
   }
 
   private buildDom(): void {
+    const L = this.labels
+    const launcherIcon = this.cfg.launcherIcon || LAUNCHER_ICON
+    const poweredBy = L.poweredBy
+      ? `<div class="linktor-powered">${L.poweredBy}</div>`
+      : ''
+
     const widget = document.createElement('div')
     widget.className = 'linktor-widget'
     widget.innerHTML = `
-      <div class="linktor-chat" role="dialog" aria-label="Chat">
+      <div class="linktor-chat" role="dialog" aria-label="${escapeAttr(L.title)}">
         <div class="linktor-header">
           <div>
-            <div class="linktor-header-title">Chat</div>
-            <div class="linktor-header-status">Connecting…</div>
+            <div class="linktor-header-title"></div>
+            <div class="linktor-header-status"></div>
           </div>
-          <button class="linktor-close" aria-label="Close chat">${CLOSE_ICON}</button>
+          <button class="linktor-close" aria-label="${escapeAttr(L.closeAriaLabel)}">${CLOSE_ICON}</button>
         </div>
         <div class="linktor-messages">
           <div class="linktor-typing"><div class="linktor-typing-dots">
@@ -195,12 +256,12 @@ export class LinktorWebChat {
           </div></div>
         </div>
         <div class="linktor-input-area">
-          <textarea class="linktor-input" placeholder="Type a message…" rows="1"></textarea>
-          <button class="linktor-send" aria-label="Send" disabled>${SEND_ICON}</button>
+          <textarea class="linktor-input" placeholder="${escapeAttr(L.inputPlaceholder)}" rows="1"></textarea>
+          <button class="linktor-send" aria-label="${escapeAttr(L.sendAriaLabel)}" disabled>${SEND_ICON}</button>
         </div>
-        <div class="linktor-powered">Powered by <a href="https://linktor.io" target="_blank" rel="noopener">Linktor</a></div>
+        ${poweredBy}
       </div>
-      ${this.cfg.showLauncher ? `<button class="linktor-launcher" aria-label="Open chat">${LAUNCHER_ICON}</button>` : ''}
+      ${this.cfg.showLauncher ? `<button class="linktor-launcher" aria-label="${escapeAttr(L.launcherAriaLabel)}">${launcherIcon}</button>` : ''}
     `
     document.body.appendChild(widget)
 
@@ -213,8 +274,26 @@ export class LinktorWebChat {
     this.titleEl = widget.querySelector('.linktor-header-title')!
     this.statusEl = widget.querySelector('.linktor-header-status')!
 
-    if (this.cfg.primaryColor) this.setColor(this.cfg.primaryColor)
-    if (this.cfg.title) this.titleEl.textContent = this.cfg.title
+    this.applyTheme()
+    this.titleEl.textContent = L.title
+    this.setStatus('connecting')
+  }
+
+  /**
+   * Applies theme tokens as CSS custom properties on the widget root, so they
+   * are scoped to this instance and never leak into the host page. `primaryColor`
+   * is honored as a shorthand for `theme.primaryColor`.
+   */
+  private applyTheme(theme?: LinktorTheme): void {
+    if (!this.root) return
+    const merged: LinktorTheme = { ...this.cfg.theme, ...theme }
+    if (this.cfg.primaryColor && merged.primaryColor === undefined) {
+      merged.primaryColor = this.cfg.primaryColor
+    }
+    for (const key of Object.keys(merged) as (keyof LinktorTheme)[]) {
+      const value = merged[key]
+      if (value) this.root.style.setProperty(THEME_VARS[key], value)
+    }
   }
 
   private wireEvents(): void {
@@ -249,18 +328,19 @@ export class LinktorWebChat {
     el.style.height = Math.min(el.scrollHeight, 100) + 'px'
   }
 
-  private setColor(color: string): void {
-    document.documentElement.style.setProperty('--linktor-color', color)
-  }
-
   private async loadConfig(): Promise<void> {
     try {
       const res = await fetch(`${this.cfg.baseUrl}/api/v1/webchat/${this.cfg.channelId}/config`)
       if (!res.ok) return
       const cfg = (await res.json()) as LinktorWidgetConfig
-      // Explicit props win over server config.
-      if (!this.cfg.primaryColor && cfg.widget_color) this.setColor(cfg.widget_color)
-      if (!this.cfg.title && cfg.widget_title && this.titleEl) this.titleEl.textContent = cfg.widget_title
+      // Explicit props/theme win over server config.
+      if (!this.cfg.primaryColor && !this.cfg.theme?.primaryColor && cfg.widget_color) {
+        this.applyTheme({ primaryColor: cfg.widget_color })
+      }
+      const titleOverridden = this.cfg.title || this.cfg.labels?.title
+      if (!titleOverridden && cfg.widget_title && this.titleEl) {
+        this.titleEl.textContent = cfg.widget_title
+      }
     } catch {
       /* config is best-effort; the widget works with defaults */
     }
@@ -281,7 +361,7 @@ export class LinktorWebChat {
     this.ws.onopen = () => {
       this.isConnected = true
       this.reconnectAttempts = 0
-      this.setStatus('Online')
+      this.setStatus('online')
       this.emit('connected')
     }
     this.ws.onmessage = (ev) => {
@@ -293,7 +373,7 @@ export class LinktorWebChat {
     }
     this.ws.onclose = () => {
       this.isConnected = false
-      this.setStatus('Offline')
+      this.setStatus('offline')
       this.emit('disconnected')
       if (!this.destroyed && this.reconnectAttempts < MAX_RECONNECT) {
         this.reconnectAttempts++
@@ -329,10 +409,31 @@ export class LinktorWebChat {
 
   private render(msg: LinktorMessage): void {
     if (!this.messagesEl || !this.typingEl) return
+    const el = this.buildMessageEl(msg)
+
+    // Custom renderer: may replace the default bubble entirely.
+    let node: HTMLElement = el
+    if (this.cfg.renderMessage) {
+      const out = this.cfg.renderMessage(msg, { defaultElement: el, formatTime })
+      if (out instanceof HTMLElement) {
+        node = out
+      } else if (typeof out === 'string') {
+        const wrap = document.createElement('div')
+        wrap.className = 'linktor-message ' + (msg.sender_type || 'contact')
+        wrap.innerHTML = out
+        node = wrap
+      }
+    }
+
+    this.messagesEl.insertBefore(node, this.typingEl)
+    this.messagesEl.scrollTop = this.messagesEl.scrollHeight
+  }
+
+  private buildMessageEl(msg: LinktorMessage): HTMLElement {
     const el = document.createElement('div')
     el.className = 'linktor-message ' + (msg.sender_type || 'contact')
 
-    const att = (msg as any).attachments?.[0]
+    const att = msg.attachments?.[0]
     if (att?.type === 'image' && att.url) {
       const img = document.createElement('img')
       img.src = att.url
@@ -348,9 +449,7 @@ export class LinktorWebChat {
     time.className = 'linktor-message-time'
     time.textContent = formatTime(msg.timestamp)
     el.appendChild(time)
-
-    this.messagesEl.insertBefore(el, this.typingEl)
-    this.messagesEl.scrollTop = this.messagesEl.scrollHeight
+    return el
   }
 
   private showTyping(show: boolean): void {
@@ -358,9 +457,13 @@ export class LinktorWebChat {
     if (show && this.messagesEl) this.messagesEl.scrollTop = this.messagesEl.scrollHeight
   }
 
-  private setStatus(text: string): void {
-    if (this.statusEl) this.statusEl.textContent = text
+  private setStatus(kind: 'online' | 'offline' | 'connecting'): void {
+    if (this.statusEl) this.statusEl.textContent = this.labels[kind]
   }
+}
+
+function escapeAttr(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 function formatTime(ts?: string): string {

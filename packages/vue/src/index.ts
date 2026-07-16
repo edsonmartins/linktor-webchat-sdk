@@ -1,7 +1,14 @@
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue'
 import type { PropType } from 'vue'
 import { LinktorWebChat } from '@linktor/webchat-core'
-import type { LinktorConfig, LinktorVisitor } from '@linktor/webchat-core'
+import type {
+  LinktorConfig,
+  LinktorLabels,
+  LinktorMessage,
+  LinktorRenderContext,
+  LinktorTheme,
+  LinktorVisitor,
+} from '@linktor/webchat-core'
 
 /**
  * Vue 3 wrapper around the Linktor WebChat core. Mounts on mounted, destroys on
@@ -21,6 +28,15 @@ export const LinktorChat = defineComponent({
     autoOpen: { type: Boolean, default: false },
     showLauncher: { type: Boolean, default: true },
     token: { type: String, default: undefined },
+    theme: { type: Object as PropType<LinktorTheme>, default: undefined },
+    labels: { type: Object as PropType<LinktorLabels>, default: undefined },
+    launcherIcon: { type: String, default: undefined },
+    customCss: { type: String, default: undefined },
+    hidePoweredBy: { type: Boolean, default: false },
+    renderMessage: {
+      type: Function as PropType<(m: LinktorMessage, ctx: LinktorRenderContext) => HTMLElement | string | void>,
+      default: undefined,
+    },
   },
   emits: ['message', 'open', 'close', 'ready'],
   setup(props, { emit }) {
@@ -37,6 +53,12 @@ export const LinktorChat = defineComponent({
         autoOpen: props.autoOpen,
         showLauncher: props.showLauncher,
         token: props.token,
+        theme: props.theme,
+        labels: props.labels,
+        launcherIcon: props.launcherIcon,
+        customCss: props.customCss,
+        hidePoweredBy: props.hidePoweredBy,
+        renderMessage: props.renderMessage,
         onMessage: (m) => emit('message', m),
         onOpen: () => emit('open'),
         onClose: () => emit('close'),
@@ -52,4 +74,11 @@ export const LinktorChat = defineComponent({
 
 export default LinktorChat
 export { LinktorWebChat } from '@linktor/webchat-core'
-export type { LinktorConfig, LinktorMessage, LinktorVisitor } from '@linktor/webchat-core'
+export type {
+  LinktorConfig,
+  LinktorMessage,
+  LinktorVisitor,
+  LinktorTheme,
+  LinktorLabels,
+  LinktorRenderContext,
+} from '@linktor/webchat-core'
