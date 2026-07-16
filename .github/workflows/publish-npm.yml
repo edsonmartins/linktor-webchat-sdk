@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   publish:
-    runs-on: self-hosted # Roda na VPS usando login existente
+    runs-on: ubuntu-latest # Runner hospedado do GitHub; publica no npmjs via NPM_TOKEN
     timeout-minutes: 20
 
     steps:
