@@ -32,5 +32,14 @@
     "tsup": "^8.2.4",
     "typescript": "^5.5.4"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "author": "Edson Martins <edsonmartins2005@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:edsonmartins/linktor-webchat-sdk.git",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

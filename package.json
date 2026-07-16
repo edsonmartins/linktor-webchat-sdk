@@ -2,17 +2,32 @@
   "name": "linktor-webchat-sdk",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Linktor WebChat widget SDK — core + plain-HTML loader + React/Vue/Angular wrappers",
-  "packageManager": "pnpm@9.6.0",
+  "author": "Edson Martins <edsonmartins2005@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:edsonmartins/linktor-webchat-sdk.git"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "pnpm -r --filter ./packages/core build && pnpm -r --filter '!./packages/core' build",
     "dev": "pnpm -r --parallel dev",
     "typecheck": "pnpm -r typecheck",
-    "clean": "pnpm -r exec rm -rf dist"
+    "clean": "pnpm -r exec rm -rf dist",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.9",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4"
-  },
-  "license": "MIT"
+  }
 }

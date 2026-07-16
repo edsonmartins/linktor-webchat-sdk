@@ -219,6 +219,30 @@ chat.open()
 chat.sendMessage('Olá!')
 ```
 
+## Publicação (npm)
+
+Mesmo fluxo do `archbase-react`: **Changesets** para versionar + **tag `v*`**
+para publicar via GitHub Actions (`.github/workflows/publish-npm.yml`, runner
+`self-hosted`, `secrets.NPM_TOKEN`).
+
+```bash
+# 1. registrar a mudança (escolhe pacotes + bump semver)
+pnpm changeset
+
+# 2. aplicar os bumps de versão + changelog
+pnpm version           # = changeset version
+
+# 3. commitar e criar a tag
+git commit -am "release: vX.Y.Z"
+git tag vX.Y.Z && git push --follow-tags
+```
+
+O push da tag dispara o workflow, que faz build + typecheck e roda
+`pnpm publish -r --access public`. O `@linktor/webchat-loader` é `private` e
+fica de fora (é servido pelo backend, não consumido via npm).
+
+Para publicar manualmente / testar no Verdaccio interno: `pnpm release`.
+
 ## Licença
 
 MIT
