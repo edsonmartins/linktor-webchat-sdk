@@ -1,0 +1,19 @@
+{
+  "name": "@linktor/webchat-loader",
+  "version": "0.1.0",
+  "description": "Plain-HTML script loader for the Linktor WebChat widget (linktor('init', ...))",
+  "private": true,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@linktor/webchat-core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4"
+  },
+  "license": "MIT"
+}
