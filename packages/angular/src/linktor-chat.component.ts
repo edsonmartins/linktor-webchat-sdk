@@ -17,6 +17,7 @@ import type {
  */
 @Component({
   selector: 'linktor-chat',
+  standalone: true,
   template: '',
 })
 export class LinktorChatComponent implements OnInit, OnDestroy {

@@ -23,13 +23,26 @@ packages/
   loader/   @linktor/webchat-loader   — bundle IIFE p/ HTML puro (linktor.js)
   react/    @linktor/react-webchat    — componente React
   vue/      @linktor/vue-webchat      — componente Vue 3
-  angular/  @linktor/angular-webchat  — componente + módulo Angular
+  angular/  @linktor/angular-webchat  — componente + módulo Angular (build ng-packagr)
 examples/
-  html/        página de exemplo (HTML puro, via loader)
-  react-demo/  app Vite que consome o @linktor/react-webchat publicado (testa canal ao vivo)
+  html/          página de exemplo (HTML puro, via loader)
+  react-demo/    app Vite consumindo @linktor/react-webchat publicado
+  vue-demo/      app Vite consumindo @linktor/vue-webchat publicado
+  angular-demo/  app Angular consumindo @linktor/angular-webchat publicado
 ```
 
-> Para testar um canal WebChat rapidamente: `cd examples/react-demo && npm install && npm run dev`.
+## Exemplos
+
+Todos os exemplos consomem os pacotes **publicados** no npm e servem para testar
+um canal WebChat ao vivo — veja a pasta
+[`examples/`](https://github.com/edsonmartins/linktor-webchat-sdk/tree/main/examples).
+
+| Alvo    | Pasta                  | Rodar                                             |
+| ------- | ---------------------- | ------------------------------------------------- |
+| HTML    | `examples/html`        | abrir `index.html` (ajuste `channelId`/`baseUrl`) |
+| React   | `examples/react-demo`  | `npm install && npm run dev` → :5180              |
+| Vue 3   | `examples/vue-demo`    | `npm install && npm run dev` → :5181              |
+| Angular | `examples/angular-demo`| `npm install && npm start` → :5182                |
 
 ## Build
 
