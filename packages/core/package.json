@@ -1,7 +1,10 @@
 {
   "name": "@linktor/webchat-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Framework-agnostic Linktor WebChat widget core",
+  "keywords": ["linktor", "webchat", "chat", "widget", "livechat", "customer-support"],
+  "homepage": "https://github.com/edsonmartins/linktor-webchat-sdk#readme",
+  "bugs": "https://github.com/edsonmartins/linktor-webchat-sdk/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
