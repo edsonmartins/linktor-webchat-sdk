@@ -28,6 +28,19 @@ export interface LinktorConfig {
    */
   token?: string
 
+  // ----- Attachments (images + audio) -----
+
+  /**
+   * Show the attach (📎) and record (🎤) controls. Defaults to the channel's
+   * `allow_attachments` setting from the server; set explicitly to force it.
+   * The server still enforces its own flag on upload.
+   */
+  allowAttachments?: boolean
+  /** Max upload size in bytes. Default 10 MB (the server limit). */
+  maxFileSizeBytes?: number
+  /** Accepted MIME types. Default: common image and audio types the server accepts. */
+  acceptedMimeTypes?: string[]
+
   // ----- Customization / extensibility -----
 
   /** Visual design tokens. Each maps to a CSS custom property on the widget root. */
@@ -77,11 +90,15 @@ export interface LinktorTheme {
   /** Header colors (default to primaryColor / white). */
   headerBg?: string
   headerColor?: string
-  /** Agent/contact bubble colors. */
+  /** Agent (and bot) bubble colors — left side. Default gray on dark text. */
   agentBubbleBg?: string
   agentBubbleColor?: string
-  /** Visitor bubble colors (default to primaryColor / white). */
+  /** Visitor bubble colors — right side. Default primaryColor / white. */
+  visitorBubbleBg?: string
+  visitorBubbleColor?: string
+  /** @deprecated Use visitorBubbleBg. Kept as an alias. */
   userBubbleBg?: string
+  /** @deprecated Use visitorBubbleColor. Kept as an alias. */
   userBubbleColor?: string
 }
 
@@ -97,6 +114,18 @@ export interface LinktorLabels {
   closeAriaLabel?: string
   /** Footer text. Set to false to hide it entirely (same as hidePoweredBy). */
   poweredBy?: string | false
+  // Attachments / recording
+  attachAriaLabel?: string
+  recordAriaLabel?: string
+  stopRecordingAriaLabel?: string
+  cancelRecordingAriaLabel?: string
+  recording?: string
+  uploading?: string
+  uploadFailed?: string
+  /** May contain `{max}`, replaced with the limit (e.g. "10 MB"). */
+  fileTooLarge?: string
+  unsupportedFile?: string
+  micDenied?: string
 }
 
 /** Context passed to a custom renderMessage hook. */
@@ -116,9 +145,12 @@ export interface LinktorVisitor {
 export type LinktorSenderType = 'contact' | 'user' | 'system'
 
 export interface LinktorAttachment {
+  /** Coarse type: "image" | "audio" | "video" | "document". */
   type?: string
   url?: string
   filename?: string
+  mime_type?: string
+  size_bytes?: number
 }
 
 export interface LinktorMessage {
@@ -135,7 +167,21 @@ export interface LinktorWidgetConfig {
   widget_title?: string
   widget_color?: string
   welcome_message?: string
+  allow_attachments?: boolean
   enabled?: boolean
 }
 
-export type LinktorEvent = 'ready' | 'open' | 'close' | 'message' | 'connected' | 'disconnected'
+/** Payload of the `upload_error` event. */
+export interface LinktorUploadError {
+  filename: string
+  error: string
+}
+
+export type LinktorEvent =
+  | 'ready'
+  | 'open'
+  | 'close'
+  | 'message'
+  | 'connected'
+  | 'disconnected'
+  | 'upload_error'

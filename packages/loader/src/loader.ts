@@ -10,7 +10,7 @@
  *     linktor('init', { channelId: 'YOUR_CHANNEL_ID', baseUrl: 'https://api.linktor.dev' });
  *   </script>
  *
- * Commands: init, open, close, toggle, sendMessage, updateUser, reset, destroy.
+ * Commands: init, open, close, toggle, sendMessage, sendFile, updateUser, reset, destroy.
  * Back-compat: if window.LinktorSettings is present it auto-inits (the legacy
  * widget.js behaviour).
  */
@@ -35,6 +35,14 @@ function exec(command: string, arg?: unknown): void {
       break
     case 'sendMessage':
       instance?.sendMessage(typeof arg === 'string' ? arg : (arg as { text?: string })?.text || '')
+      break
+    case 'sendFile':
+      // Accepts a File/Blob, or { file, filename } for a Blob without a name.
+      if (arg instanceof Blob) void instance?.sendFile(arg)
+      else if (arg && (arg as { file?: Blob }).file instanceof Blob) {
+        const { file, filename } = arg as { file: Blob; filename?: string }
+        void instance?.sendFile(file, filename)
+      }
       break
     case 'updateUser':
       instance?.updateUser(arg as LinktorConfig['visitor'] as Record<string, string>)

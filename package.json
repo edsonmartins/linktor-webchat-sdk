@@ -21,6 +21,7 @@
     "dev": "pnpm -r --parallel dev",
     "typecheck": "pnpm -r typecheck",
     "clean": "pnpm -r exec rm -rf dist",
+    "copy:embed": "cp packages/loader/dist/linktor.js \"${LINKTOR_EMBED_DIR:-../linktor/web/embed/v1}/linktor.js\"",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish"
