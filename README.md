@@ -259,6 +259,10 @@ fica de fora (é servido pelo backend, não consumido via npm).
 
 Para publicar manualmente / testar no Verdaccio interno: `pnpm release`.
 
+## Contribuição
+
+Contribuições são bem-vindas! Antes de abrir um PR, leia o [guia de contribuição](CONTRIBUTING.md): ele cobre ambiente, build, changesets, padrão de commits e a assinatura DCO (`git commit -s`).
+
 ## Licença
 
-MIT
+[MIT](LICENSE)
