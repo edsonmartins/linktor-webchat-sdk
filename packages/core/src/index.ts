@@ -9,5 +9,6 @@ export type {
   LinktorAttachment,
   LinktorSenderType,
   LinktorWidgetConfig,
+  LinktorUploadError,
   LinktorEvent,
 } from './types'

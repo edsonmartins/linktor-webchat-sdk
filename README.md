@@ -67,8 +67,28 @@ serve em `/widget/v1/linktor.js`.
 | `autoOpen`     | `boolean`            |             | Abre automaticamente ao montar           |
 | `showLauncher` | `boolean`            |             | Mostra o botão flutuante (padrão `true`) |
 | `token`        | `string`             |             | Token opcional de sessão autenticada     |
+| `allowAttachments` | `boolean`        |             | Mostra 📎 e 🎤. Padrão: flag `allow_attachments` do canal |
+| `maxFileSizeBytes` | `number`         |             | Limite de upload (padrão 10 MB, o mesmo do servidor) |
+| `acceptedMimeTypes` | `string[]`      |             | MIMEs aceitos (padrão: imagens e áudios comuns) |
 
-Eventos: `onReady`, `onOpen`, `onClose`, `onMessage(msg)`.
+Eventos: `onReady`, `onOpen`, `onClose`, `onMessage(msg)`. Pelo `chat.on(...)`
+também: `connected`, `disconnected`, `upload_error({ filename, error })`.
+
+### Anexos: imagem e áudio
+
+Com anexos liberados no canal (admin → canal WebChat → *Permitir anexos*) o
+widget ganha o clipe (📎: imagem ou arquivo de áudio) e o microfone (🎤: grava
+com `MediaRecorder`, até 2 min). O arquivo sobe por
+`POST {baseUrl}/api/v1/webchat/{channelId}/upload` e a mensagem sai pelo
+WebSocket com `attachments[]`. Anexos recebidos do atendente aparecem como
+`<img>`, `<audio controls>` ou link.
+
+Programaticamente: `chat.sendFile(file, filename?)`, `chat.startRecording()`,
+`chat.stopRecording(send)`.
+
+> Em produção, o site onde o widget está embutido precisa constar em
+> `LINKTOR_CORS_ALLOWED_ORIGINS` (e `LINKTOR_WS_ALLOWED_ORIGINS`) do Linktor,
+> como já era preciso para o WebSocket.
 
 ## Customização / extensibilidade
 
@@ -94,10 +114,10 @@ theme: {
   launcherIconColor: '#ffffff',
   headerBg: '#111827',        // padrão: primaryColor
   headerColor: '#ffffff',
-  agentBubbleBg: '#f3f4f6',
+  agentBubbleBg: '#f3f4f6',     // balão do atendente (esquerda)
   agentBubbleColor: '#111827',
-  userBubbleBg: '#4f46e5',    // padrão: primaryColor
-  userBubbleColor: '#ffffff',
+  visitorBubbleBg: '#4f46e5',   // balão do visitante (direita); padrão: primaryColor. userBubble* é alias
+  visitorBubbleColor: '#ffffff',
 }
 ```
 
@@ -112,6 +132,16 @@ labels: {
   inputPlaceholder: 'Escreva sua mensagem…',
   sendAriaLabel: 'Enviar',
   poweredBy: false,           // remove o rodapé "Powered by Linktor"
+  // anexos / gravação
+  attachAriaLabel: 'Anexar imagem ou áudio',
+  recordAriaLabel: 'Gravar áudio',
+  stopRecordingAriaLabel: 'Enviar gravação',
+  cancelRecordingAriaLabel: 'Cancelar gravação',
+  uploading: 'Enviando…',
+  uploadFailed: 'Falha no envio',
+  fileTooLarge: 'Arquivo muito grande (máx. {max})',
+  unsupportedFile: 'Só imagens e áudios',
+  micDenied: 'Sem acesso ao microfone',
 }
 ```
 
@@ -167,6 +197,7 @@ Classes estáveis para estilizar: `.linktor-widget`, `.linktor-launcher`,
 
 Comandos programáticos: `linktor('open')`, `linktor('close')`,
 `linktor('toggle')`, `linktor('sendMessage', 'texto')`,
+`linktor('sendFile', file)` (ou `{ file, filename }`),
 `linktor('updateUser', { name })`, `linktor('reset')`, `linktor('destroy')`.
 
 > Retrocompatível: se `window.LinktorSettings = { channelId, baseUrl }` existir,
