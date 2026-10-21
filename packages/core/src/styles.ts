@@ -37,11 +37,19 @@ export function widgetStyles(position: 'left' | 'right', zIndex: number): string
     .linktor-close svg { width: 20px; height: 20px; fill: currentColor; }
     .linktor-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .linktor-message { max-width: 80%; padding: 10px 14px; border-radius: 16px; line-height: 1.4; word-wrap: break-word; }
-    .linktor-message.contact { background-color: var(--linktor-agent-bubble-bg, #e9ecef); color: var(--linktor-agent-bubble-color, #333); align-self: flex-start; border-bottom-left-radius: 4px; }
-    .linktor-message.user { background-color: var(--linktor-user-bubble-bg, var(--linktor-color, #007bff)); color: var(--linktor-user-bubble-color, #fff); align-self: flex-end; border-bottom-right-radius: 4px; }
+    /* The visitor's own messages sit on the right in the brand color; the agent's on the left in gray. */
+    .linktor-message.contact { background-color: var(--linktor-visitor-bubble-bg, var(--linktor-color, #007bff)); color: var(--linktor-visitor-bubble-color, #fff); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .linktor-message.user { background-color: var(--linktor-agent-bubble-bg, #e9ecef); color: var(--linktor-agent-bubble-color, #333); align-self: flex-start; border-bottom-left-radius: 4px; }
     .linktor-message.system { background-color: #6c757d; color: #fff; align-self: center; font-size: 12px; }
+    .linktor-message.sending { opacity: .65; }
+    .linktor-message.failed { box-shadow: 0 0 0 2px #dc3545; }
     .linktor-message img { max-width: 100%; border-radius: 8px; display: block; }
+    .linktor-message a.linktor-image { display: block; }
+    .linktor-message audio { display: block; width: 240px; max-width: 100%; margin-top: 2px; }
+    .linktor-message a.linktor-file { color: inherit; text-decoration: underline; word-break: break-all; }
     .linktor-message-time { font-size: 10px; opacity: .7; margin-top: 4px; }
+    .linktor-message-status { font-size: 10px; margin-top: 2px; opacity: .85; }
+    .linktor-message.failed .linktor-message-status { color: #dc3545; opacity: 1; }
     .linktor-typing { display: none; padding: 10px 14px; background-color: var(--linktor-agent-bubble-bg, #e9ecef); border-radius: 16px; align-self: flex-start; max-width: 60px; }
     .linktor-typing.show { display: block; }
     .linktor-typing-dots { display: flex; gap: 4px; }
@@ -49,9 +57,9 @@ export function widgetStyles(position: 'left' | 'right', zIndex: number): string
     .linktor-typing-dot:nth-child(1) { animation-delay: -.32s; }
     .linktor-typing-dot:nth-child(2) { animation-delay: -.16s; }
     @keyframes linktor-bounce { 0%,80%,100% { transform: scale(0); } 40% { transform: scale(1); } }
-    .linktor-input-area { padding: 12px 16px; border-top: 1px solid #e9ecef; display: flex; gap: 8px; align-items: flex-end; }
+    .linktor-input-area { padding: 12px 16px; border-top: 1px solid #e9ecef; display: flex; gap: 6px; align-items: flex-end; }
     .linktor-input {
-      flex: 1; border: 1px solid #e9ecef; border-radius: 20px; padding: 10px 16px; font-size: 14px;
+      flex: 1; min-width: 0; border: 1px solid #e9ecef; border-radius: 20px; padding: 10px 16px; font-size: 14px;
       outline: none; resize: none; max-height: 100px; font-family: inherit;
     }
     .linktor-input:focus { border-color: var(--linktor-color, #007bff); }
@@ -61,6 +69,23 @@ export function widgetStyles(position: 'left' | 'right', zIndex: number): string
     }
     .linktor-send:disabled { opacity: .5; cursor: not-allowed; }
     .linktor-send svg { width: 20px; height: 20px; fill: #fff; }
+    .linktor-icon-btn {
+      width: 40px; height: 40px; border-radius: 50%; background: none; border: none; cursor: pointer; color: #666;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .linktor-icon-btn:hover { background: #f0f0f0; color: var(--linktor-color, #007bff); }
+    .linktor-icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+    .linktor-icon-btn[hidden], .linktor-file-input { display: none; }
+    .linktor-recording { display: none; flex: 1; align-items: center; gap: 10px; min-height: 40px; }
+    /* Direct children only: the recording bar has its own .linktor-send inside .linktor-recording. */
+    .linktor-input-area.recording > .linktor-input,
+    .linktor-input-area.recording > .linktor-send,
+    .linktor-input-area.recording > .linktor-attach,
+    .linktor-input-area.recording > .linktor-record { display: none; }
+    .linktor-input-area.recording .linktor-recording { display: flex; }
+    .linktor-rec-dot { width: 10px; height: 10px; border-radius: 50%; background: #dc3545; animation: linktor-blink 1s infinite; flex-shrink: 0; }
+    @keyframes linktor-blink { 50% { opacity: .15; } }
+    .linktor-rec-time { flex: 1; font-variant-numeric: tabular-nums; color: #333; }
     .linktor-powered { text-align: center; padding: 8px; font-size: 11px; color: #999; border-top: 1px solid #f0f0f0; }
     .linktor-powered a { color: #666; text-decoration: none; }
     @media (max-width: 480px) {
